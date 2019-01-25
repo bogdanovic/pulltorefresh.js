@@ -24,6 +24,8 @@ const _defaults = {
   getStyles: _ptrStyles,
   onInit: () => {},
   onRefresh: () => location.reload(),
+  onPullStart: function () { },
+  onRelease: function () { },
   resistanceFunction: t => Math.min(1, t / 2.5),
   shouldPullToRefresh() {
     return typeof this.mainElement === 'string'
@@ -180,7 +182,12 @@ function _setupEvents() {
       return;
     }
 
+    var callOnPullStart = false;
+
     if (_shared.state === 'pending') {
+
+      callOnPullStart = true;
+
       _el.ptrElement.classList.add(`${_el.classPrefix}pull`);
       _shared.state = 'pulling';
       _ptr.update(_el);
@@ -193,6 +200,11 @@ function _setupEvents() {
     _shared.distExtra = _shared.dist - _el.distIgnore;
 
     if (_shared.distExtra > 0) {
+
+      if (callOnPullStart) {
+        _el.onPullStart();
+      }
+
       e.preventDefault();
 
       _el.ptrElement.style[_el.cssProp] = `${_shared.distResisted}px`;
@@ -222,6 +234,8 @@ function _setupEvents() {
     if (_shared.state === 'releasing' && _shared.distResisted > _el.distThreshold) {
       _shared.state = 'refreshing';
 
+      _el.onRelease(true);
+
       _el.ptrElement.style[_el.cssProp] = `${_el.distReload}px`;
       _el.ptrElement.classList.add(`${_el.classPrefix}refresh`);
 
@@ -238,8 +252,13 @@ function _setupEvents() {
       }, _el.refreshTimeout);
     } else {
       if (_shared.state === 'refreshing') {
+
+        _el.onRelease(true);
+
         return;
       }
+
+      _el.onRelease(false);
 
       _el.ptrElement.style[_el.cssProp] = '0px';
 

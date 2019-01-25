@@ -107,6 +107,10 @@ API
 - **`onRefresh`** (function)
   What will the pull to refresh trigger? You can return a promise.
   <br />&mdash; Defaults to `window.location.reload()`
+- **`onPullStart`** (function)
+  Triggered when pull to refresh are started.
+- **`onRelease`** (function)
+  Triggered when pull to refresh are ending return a boolean if will be triggered `onRelease` function.
 - **`resistanceFunction`** (function)
   The resistance function, accepts one parameter, must return a number, capping at 1.
   <br />&mdash; Defaults to `t => Math.min(1, t / 2.5)`

@@ -153,7 +153,11 @@
         return;
       }
 
+      var callOnPullStart = false;
+
       if (_shared.state === 'pending') {
+        callOnPullStart = true;
+
         _el.ptrElement.classList.add(((_el.classPrefix) + "pull"));
 
         _shared.state = 'pulling';
@@ -169,6 +173,11 @@
 
       if (_shared.distExtra > 0) {
         e.preventDefault();
+
+        if (callOnPullStart) {
+          _el.onPullStart();
+        }
+
         _el.ptrElement.style[_el.cssProp] = (_shared.distResisted) + "px";
         _shared.distResisted = _el.resistanceFunction(_shared.distExtra / _el.distThreshold) * Math.min(_el.distMax, _shared.distExtra);
 
@@ -197,6 +206,9 @@
 
       if (_shared.state === 'releasing' && _shared.distResisted > _el.distThreshold) {
         _shared.state = 'refreshing';
+
+        _el.onRelease(true);
+
         _el.ptrElement.style[_el.cssProp] = (_el.distReload) + "px";
 
         _el.ptrElement.classList.add(((_el.classPrefix) + "refresh"));
@@ -214,8 +226,11 @@
         }, _el.refreshTimeout);
       } else {
         if (_shared.state === 'refreshing') {
+          _el.onRelease(true);
           return;
         }
+
+        _el.onRelease(false);
 
         _el.ptrElement.style[_el.cssProp] = '0px';
         _shared.state = 'pending';
@@ -286,6 +301,8 @@
     getStyles: function () { return _ptrStyles; },
     onInit: function () {},
     onRefresh: function () { return location.reload(); },
+    onPullStart: function () { },
+    onRelease: function () { },
     resistanceFunction: function (t) { return Math.min(1, t / 2.5); },
 
     shouldPullToRefresh: function shouldPullToRefresh() {
